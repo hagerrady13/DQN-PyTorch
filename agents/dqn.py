@@ -13,12 +13,13 @@ from torch.autograd import Variable
 import torchvision.utils as vutils
 
 from graphs.models.dqn import DQN
-from graphs.models.replay_memory import ReplayMemory
+from graphs.models.replay_memory import ReplayMemory, Transition
 from graphs.losses.loss import HuberLoss
 
 from tensorboardX import SummaryWriter
 from utils.metrics import AverageMeter, AverageMeterList, evaluate
 from utils.misc import print_cuda_statistics
+from utils.extract_env_input import get_screen
 
 cudnn.benchmark = True
 
@@ -98,7 +99,7 @@ class DQNAgent:
 
     def save_checkpoint(self, file_name="checkpoint.pth.tar", is_best = 0):
         state = {
-            'epoch': self.current_epoch + 1,
+            'epoch': self.current_episode + 1,
             'iteration': self.current_iteration,
             'state_dict': self.policy_model.state_dict(),
             'optimizer': self.optim.state_dict(),
@@ -133,89 +134,96 @@ class DQNAgent:
         else:
             return torch.tensor([[random.randrange(2)]], device=self.device, dtype=torch.long)
 
+    def optimized_policy_model(self):
+        if self.memory.length() < self.batch_size:
+            return
+        # sample a batch
+        transitions = self.memory.sample_batch(self.batch_size)
+
+        # print("Transitions", transitions)
+        one_batch = Transition(*zip(*transitions))
+        # print("One batch", one_batch)
+
+        # concatenate all tensors into one
+        state_batch = torch.cat(one_batch.state)
+        action_batch = torch.cat(one_batch.action)
+        reward_batch = torch.cat(one_batch.reward)
+
+        # debug here
+        curr_state_values = self.policy_model(state_batch)
+        curr_state_action_values = curr_state_values.gather(1, action_batch)
+
+        # create a mask of non-final states
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,one_batch.next_state)), device=self.device, dtype=torch.uint8)
+        non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])
+
+        # Get V(s_{t+1}) for all next states. By defition we set V(s)=0 if s is a terminal state.
+        next_state_values = torch.zeros(self.batch_size, device=self.device)
+        next_state_values[non_final_mask] = self.target_model(non_final_next_states).max(1)[0].detach()
+
+        # Get the expected Q values
+        expected_state_action_values = (next_state_values * self.config.gamma) + reward_batch
+
+        # compute loss: temporal difference error
+        loss = self.loss(curr_state_action_values, expected_state_action_values.unsqueeze(1))
+
+        # optimizer step
+        self.optim.step()
+        loss.backward()
+        for param in self.policy_model.parameters():
+            param.grad.data.clamp_(-1, 1)
+        self.optim.step()
+
     def train(self):
-        for epoch in range(self.current_epoch, self.config.max_epoch):
-            self.current_epoch = epoch
+        for episode in tqdm(range(self.current_episode, self.config.num_episodes)):
+            self.current_episode = episode
             self.train_one_epoch()
-            self.save_checkpoint()
+            # update the target model???
+            # The target network has its weights kept frozen most of the time, but is updated with the policy network’s weights every so often
+            if self.current_episode % self.config.target_update:
+                self.target_model.load_state_dict(self.policy_model.state_dict())
+
+        print('Complete')
+        self.env.render()
+        self.env.close()
 
     def train_one_epoch(self):
-        # initialize tqdm batch
+        # reset environment
+        self.env.reset()
+        prev_frame = get_screen(self.env, self.config.screen_width)
+        curr_frame = get_screen(self.env, self.config.screen_width)
+        # get state
+        curr_state = curr_frame - prev_frame
 
-        epoch_lossG = AverageMeter()
-        epoch_lossD = AverageMeter()
-
-
-        for curr_it, x in enumerate(tqdm_batch):
-            #y = torch.full((self.batch_size,), self.real_label)
-            x = x[0]
-            y = torch.randn(x.size(0), )
-            fake_noise = torch.randn(x.size(0), self.config.g_input_size, 1, 1)
-
+        while(1):
+            # select action
+            action = self.select_action(curr_state)
+            # perform action and get reward
+            _, reward, done, _ = self.env.step(action.item())
             if self.cuda:
-                x = x.cuda(async=self.config.async_loading)
-                y = y.cuda(async=self.config.async_loading)
-                fake_noise = fake_noise.cuda(async=self.config.async_loading)
+                reward = torch.Tensor([reward]).cuda()
+            else:
+                reward = torch.Tensor([reward])
 
-            x = Variable(x)
-            y = Variable(y)
-            fake_noise = Variable(fake_noise)
-            ####################
-            # Update D network: maximize log(D(x)) + log(1 - D(G(z)))
-            # train with real
-            self.netD.zero_grad()
-            D_real_out = self.netD(x)
-            y.fill_(self.real_label)
-            loss_D_real = self.loss(D_real_out, y)
-            loss_D_real.backward()
-            #D_mean_real_out = D_real_out.mean().item()
+            prev_frame = curr_frame
+            curr_frame = get_screen(self.env, self.config.screen_width)
+            # assign next state
+            if done:
+                next_state = None
+            else:
+                next_state = curr_frame - prev_frame
 
-            # train with fake
-            G_fake_out = self.netG(fake_noise)
-            y.fill_(self.fake_label)
+            # add this transition into memory
+            self.memory.push_transition(curr_state, action, next_state, reward)
 
-            D_fake_out = self.netD(G_fake_out.detach())
+            curr_state = next_state
 
-            loss_D_fake = self.loss(D_fake_out, y)
-            loss_D_fake.backward()
-            #D_mean_fake_out = D_fake_out.mean().item()
+            # Policy model optimization step #
+            self.optimized_policy_model()
 
-            loss_D = loss_D_fake + loss_D_real
-            self.optimD.step()
-
-            ####################
-            # Update G network: maximize log(D(G(z)))
-            self.netG.zero_grad()
-            y.fill_(self.real_label)
-            D_out = self.netD(G_fake_out)
-            loss_G = self.loss(D_out, y)
-            loss_G.backward()
-
-            #D_G_mean_out = D_out.mean().item()
-
-            self.optimG.step()
-
-            epoch_lossD.update(loss_D.data[0])
-            epoch_lossG.update(loss_G.data[0])
-
-            self.current_iteration += 1
-
-            self.summary_writer.add_scalar("epoch/Generator_loss", epoch_lossG.val, self.current_iteration)
-            self.summary_writer.add_scalar("epoch/Discriminator_loss", epoch_lossD.val, self.current_iteration)
-
-            if self.current_iteration % 1000 ==  0:
-                self.summary_writer.add_image("train/Real_Image", x, self.current_iteration)
-                gen_out = self.netG(self.fixed_noise)
-
-                out_img = self.dataloader.plot_samples_per_epoch(gen_out.data, self.current_iteration)
-                self.summary_writer.add_image('train/generated_image', out_img, self.current_iteration)
-                self.summary_writer.add_image("Generated Images",out_img, self.current_iteration)
-
-        tqdm_batch.close()
-
-        print("Training at epoch-" + str(self.current_epoch) + " | " + "Discriminator loss: " + str(
-            epoch_lossD.val) + " - Generator Loss-: " + str(epoch_lossG.val))
-
+            # check if done
+            if done:
+                break
 
     def validate(self):
         pass
@@ -229,4 +237,3 @@ class DQNAgent:
         self.save_checkpoint()
         self.summary_writer.export_scalars_to_json("{}all_scalars.json".format(self.config.summary_dir))
         self.summary_writer.close()
-        self.dataloader.finalize()

@@ -11,7 +11,7 @@
   "conv_filters": [16, 32, 32],
 
   "batch_size": 128,
-  "Gamma": 0.999,
+  "gamma": 0.999,
   "eps_start": 0.9,
   "eps_end": 0.05,
   "eps_decay": 200,
@@ -25,7 +25,7 @@
 
   "screen_width": 600,
 
-  "max_epoch": 30,
+  "max_epoch": 50,
 
   "validate_every": 2,
 
