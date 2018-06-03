@@ -1,3 +1,7 @@
+"""
+Code adapted from: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+"""
+
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
@@ -8,21 +12,21 @@ resize = transforms.Compose([transforms.ToPILImage(),
                             transforms.ToTensor()])
 
 
-def get_cart_location(config, env):
+def get_cart_location(env, screen_width):
     world_width = env.x_threshold * 2
-    scale = config.screen_width / world_width
-    return int(env.state[0] * scale + config.screen_width / 2.0)  # MIDDLE OF CART
+    scale = screen_width / world_width
+    return int(env.state[0] * scale + screen_width / 2.0)  # MIDDLE OF CART
 
 
-def get_screen(config, env):
+def get_screen(env, screen_width):
     screen = env.render(mode='rgb_array').transpose((2, 0, 1))  # transpose into torch order (CHW)
     # Strip off the top and bottom of the screen
     screen = screen[:, 160:320]
     view_width = 320
-    cart_location = get_cart_location(config, env)
+    cart_location = get_cart_location(env, screen_width)
     if cart_location < view_width // 2:
         slice_range = slice(view_width)
-    elif cart_location > (config.screen_width - view_width // 2):
+    elif cart_location > (screen_width - view_width // 2):
         slice_range = slice(-view_width, None)
     else:
         slice_range = slice(cart_location - view_width // 2,
