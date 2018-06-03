@@ -10,6 +10,8 @@ Transition = namedtuple('Transition',('state', 'action', 'next_state', 'reward')
 
 class ReplayMemory(object):
     def __init__(self, config):
+        self.config = config
+
         self.capacity = self.config.memory_capacity
         self.memory = []
         self.position = 0
@@ -17,7 +19,7 @@ class ReplayMemory(object):
     def length(self):
         return len(self.memory)
 
-    def push_to_memory(self, *args):
+    def push_transition(self, *args):
         if self.length() < self.capacity:
             self.memory.append(None)
         self.memory[self.position] = Transition(*args)

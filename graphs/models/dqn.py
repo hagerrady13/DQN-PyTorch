@@ -19,17 +19,18 @@ class DQN(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=self.config.input_channels, out_channels=self.config.conv_filters[0], kernel_size=5, stride=2, padding=0, bias=True)
         self.bn1 = nn.BatchNorm2d(self.config.conv_filters[0])
 
-        self.conv1 = nn.Conv2d(in_channels=self.config.conv_filters[0], out_channels=self.config.conv_filters[1], kernel_size=5, stride=2, padding=0, bias=True)
-        self.bn1 = nn.BatchNorm2d(self.config.conv_filters[1])
+        self.conv2 = nn.Conv2d(in_channels=self.config.conv_filters[0], out_channels=self.config.conv_filters[1], kernel_size=5, stride=2, padding=0, bias=True)
+        self.bn2 = nn.BatchNorm2d(self.config.conv_filters[1])
 
-        self.conv1 = nn.Conv2d(in_channels=self.config.conv_filters[1], out_channels=self.config.conv_filters[2], kernel_size=5, stride=2, padding=0, bias=True)
-        self.bn1 = nn.BatchNorm2d(self.config.conv_filters[2])
+        self.conv3 = nn.Conv2d(in_channels=self.config.conv_filters[1], out_channels=self.config.conv_filters[2], kernel_size=5, stride=2, padding=0, bias=True)
+        self.bn3 = nn.BatchNorm2d(self.config.conv_filters[2])
 
         self.linear = nn.Linear(448, self.config.num_classes)
 
         self.apply(weights_init)
 
     def forward(self, x):
+
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -51,17 +52,17 @@ class DQN(nn.Module):
 #########################
 Architecture:
 #########################
-Input: (N, 3, 64, 64)
+Input: (N, 3, 40, 80)
 
-conv1: (N, 64, 32, 32)   ==> H/2, W/2
-conv2: (N, 128, 16, 16)  ==> H/4, W/4
-conv3: (N, 256, 8, 8)    ==> H/8, W/8
-
+Conv2d(3, 16, kernel_size=(5, 5), stride=(2, 2))
+Conv2d(16, 32, kernel_size=(5, 5), stride=(2, 2))
+Conv2d(32, 32, kernel_size=(5, 5), stride=(2, 2))
+Linear(in_features=448, out_features=2, bias=True)
 ----
-torch.Size([4, 3, 64, 64])
-torch.Size([4, 64, 32, 32])
-torch.Size([4, 128, 16, 16])
-torch.Size([4, 256, 8, 8])
-torch.Size([4, 512, 4, 4])
-torch.Size([4, 1, 1, 1])
+torch.Size([128, 3, 40, 80])
+torch.Size([128, 16, 18, 38])
+torch.Size([128, 32, 7, 17])
+torch.Size([128, 32, 2, 7]) --> 32x2x7 = 448
+torch.Size([128, 2])
+
 """

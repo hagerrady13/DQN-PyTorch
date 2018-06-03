@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.Functional as F
+
 
 class BinaryCrossEntropy(nn.Module):
     def __init__(self):
@@ -20,4 +20,3 @@ class HuberLoss(nn.Module):
         loss = self.loss(logits, labels)
         return loss
 
-#loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
