@@ -84,12 +84,10 @@ class DQNAgent:
             print("Loading checkpoint '{}'".format(filename))
             checkpoint = torch.load(filename)
 
-            self.current_epoch = checkpoint['epoch']
+            self.current_epoch = checkpoint['episode']
             self.current_iteration = checkpoint['iteration']
             self.policy_model.load_state_dict(checkpoint['state_dict'])
             self.optim.load_state_dict(checkpoint['optimizer'])
-            self.fixed_noise = checkpoint['fixed_noise']
-            self.manual_seed = checkpoint['manual_seed']
 
             print("Checkpoint loaded successfully from '{}' at (epoch {}) at (iteration {})\n"
                   .format(self.config.checkpoint_dir, checkpoint['epoch'], checkpoint['iteration']))
@@ -99,12 +97,10 @@ class DQNAgent:
 
     def save_checkpoint(self, file_name="checkpoint.pth.tar", is_best = 0):
         state = {
-            'epoch': self.current_episode + 1,
+            'episode': self.current_episode,
             'iteration': self.current_iteration,
             'state_dict': self.policy_model.state_dict(),
             'optimizer': self.optim.state_dict(),
-            'fixed_noise': self.fixed_noise,
-            'manual_seed': self.manual_seed
         }
         # Save the state
         torch.save(state, self.config.checkpoint_dir + file_name)
