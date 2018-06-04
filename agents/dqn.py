@@ -19,7 +19,7 @@ from graphs.losses.loss import HuberLoss
 from tensorboardX import SummaryWriter
 from utils.metrics import AverageMeter, AverageMeterList, evaluate
 from utils.misc import print_cuda_statistics
-from utils.extract_env_input import get_screen
+from utils.extract_env_input import CartPoleEnv
 
 cudnn.benchmark = True
 
@@ -35,9 +35,6 @@ class DQNAgent:
         #define memory
         self.memory = ReplayMemory(self.config)
 
-        # define dataloader
-        self.batch_size = self.config.batch_size
-
         # define loss
         self.loss = HuberLoss()
 
@@ -45,12 +42,15 @@ class DQNAgent:
         self.optim = torch.optim.RMSprop(self.policy_model.parameters())
 
         # define environment
+        #self.env = gym.make('MsPacman-v0').unwrapped
         self.env = gym.make('CartPole-v0').unwrapped
+        self.cartpole = CartPoleEnv(self.config.screen_width)
 
         # initialize counter
         self.current_episode = 0
         self.current_iteration = 0
         self.episode_durations = []
+        self.batch_size = self.config.batch_size
 
         # set cuda flag
         self.is_cuda = torch.cuda.is_available()
@@ -71,7 +71,7 @@ class DQNAgent:
             self.device = "cpu"
 
         # Model Loading from the latest checkpoint if not found start from scratch.
-        self.load_checkpoint(self.config.checkpoint_file)
+        # self.load_checkpoint(self.config.checkpoint_file)
         self.target_model.load_state_dict(self.policy_model.state_dict())
         self.target_model.eval()
 
@@ -90,7 +90,7 @@ class DQNAgent:
             self.optim.load_state_dict(checkpoint['optimizer'])
 
             print("Checkpoint loaded successfully from '{}' at (epoch {}) at (iteration {})\n"
-                  .format(self.config.checkpoint_dir, checkpoint['epoch'], checkpoint['iteration']))
+                  .format(self.config.checkpoint_dir, checkpoint['episode'], checkpoint['iteration']))
         except OSError as e:
             print("No checkpoint exists from '{}'. Skipping...".format(self.config.checkpoint_dir))
             print("**First time to train**")
@@ -130,7 +130,7 @@ class DQNAgent:
         else:
             return torch.tensor([[random.randrange(2)]], device=self.device, dtype=torch.long)
 
-    def optimized_policy_model(self):
+    def optimize_policy_model(self):
         if self.memory.length() < self.batch_size:
             return
         # sample a batch
@@ -153,7 +153,7 @@ class DQNAgent:
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,one_batch.next_state)), device=self.device, dtype=torch.uint8)
         non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])
 
-        # Get V(s_{t+1}) for all next states. By defition we set V(s)=0 if s is a terminal state.
+        # Get V(s_{t+1}) for all next states. By definition we set V(s)=0 if s is a terminal state.
         next_state_values = torch.zeros(self.batch_size, device=self.device)
         next_state_values[non_final_mask] = self.target_model(non_final_next_states).max(1)[0].detach()
 
@@ -162,13 +162,14 @@ class DQNAgent:
 
         # compute loss: temporal difference error
         loss = self.loss(curr_state_action_values, expected_state_action_values.unsqueeze(1))
-
         # optimizer step
         self.optim.step()
         loss.backward()
         for param in self.policy_model.parameters():
             param.grad.data.clamp_(-1, 1)
         self.optim.step()
+
+        return loss
 
     def train(self):
         for episode in tqdm(range(self.current_episode, self.config.num_episodes)):
@@ -184,14 +185,17 @@ class DQNAgent:
         self.env.close()
 
     def train_one_epoch(self):
+        episode_loss = AverageMeter()
+        episode_duration = 0
         # reset environment
         self.env.reset()
-        prev_frame = get_screen(self.env, self.config.screen_width)
-        curr_frame = get_screen(self.env, self.config.screen_width)
+        prev_frame = self.cartpole.get_screen(self.env)
+        curr_frame = self.cartpole.get_screen(self.env)
         # get state
         curr_state = curr_frame - prev_frame
 
         while(1):
+            episode_duration += 1
             # select action
             action = self.select_action(curr_state)
             # perform action and get reward
@@ -202,7 +206,7 @@ class DQNAgent:
                 reward = torch.Tensor([reward])
 
             prev_frame = curr_frame
-            curr_frame = get_screen(self.env, self.config.screen_width)
+            curr_frame = self.cartpole.get_screen(self.env)
             # assign next state
             if done:
                 next_state = None
@@ -215,11 +219,15 @@ class DQNAgent:
             curr_state = next_state
 
             # Policy model optimization step #
-            self.optimized_policy_model()
-
+            curr_loss = self.optimize_policy_model()
+            if curr_loss is not None:
+                self.summary_writer.add_scalar("Temporal Difference Loss", curr_loss.detach().numpy(), self.current_iteration)
             # check if done
             if done:
                 break
+
+        self.summary_writer.add_scalar("Training Episode Duration", episode_duration, self.current_episode)
+
 
     def validate(self):
         pass
