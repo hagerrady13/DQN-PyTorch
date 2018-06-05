@@ -163,7 +163,7 @@ class DQNAgent:
         # compute loss: temporal difference error
         loss = self.loss(curr_state_action_values, expected_state_action_values.unsqueeze(1))
         # optimizer step
-        self.optim.step()
+        self.optim.zero_grad()
         loss.backward()
         for param in self.policy_model.parameters():
             param.grad.data.clamp_(-1, 1)
@@ -176,7 +176,7 @@ class DQNAgent:
             self.current_episode = episode
             self.train_one_epoch()
             # update the target model???
-            # The target network has its weights kept frozen most of the time, but is updated with the policy network’s weights every so often
+            # The target network has its weights kept frozen most of the time
             if self.current_episode % self.config.target_update:
                 self.target_model.load_state_dict(self.policy_model.state_dict())
 
@@ -185,7 +185,6 @@ class DQNAgent:
         self.env.close()
 
     def train_one_epoch(self):
-        episode_loss = AverageMeter()
         episode_duration = 0
         # reset environment
         self.env.reset()
