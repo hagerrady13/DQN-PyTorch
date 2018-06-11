@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 from graphs.losses.loss import HuberLoss
 from graphs.models.dqn import DQN
-from utils.extract_env_input import CartPoleEnv
+from utils.env_utils import CartPoleEnv
 from utils.misc import print_cuda_statistics
 from utils.replay_memory import ReplayMemory, Transition
 
@@ -130,6 +130,10 @@ class DQNAgent:
 
         one_batch = Transition(*zip(*transitions))
 
+        # create a mask of non-final states
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, one_batch.next_state)), device=self.device, dtype=torch.uint8)      # [128]
+        non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])       # [< 128, 3, 40, 80]
+
         # concatenate all batch elements into one
         state_batch = torch.cat(one_batch.state)            # [128, 3, 40, 80]
         action_batch = torch.cat(one_batch.action)          # [128, 1]
@@ -138,10 +142,6 @@ class DQNAgent:
         # debug here
         curr_state_values = self.policy_model(state_batch)          # [128, 2]
         curr_state_action_values = curr_state_values.gather(1, action_batch)        # [128, 1]
-
-        # create a mask of non-final states
-        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,one_batch.next_state)), device=self.device, dtype=torch.uint8)      # [128]
-        non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])       # [< 128, 3, 40, 80]
 
         # Get V(s_{t+1}) for all next states. By definition we set V(s)=0 if s is a terminal state.
         next_state_values = torch.zeros(self.batch_size, device=self.device)        # [128]
@@ -189,6 +189,7 @@ class DQNAgent:
             action = self.select_action(curr_state)
             # perform action and get reward
             _, reward, done, _ = self.env.step(action.item())
+
             if self.cuda:
                 reward = torch.Tensor([reward]).cuda()
             else:
@@ -216,7 +217,6 @@ class DQNAgent:
                 break
 
         self.summary_writer.add_scalar("Training Episode Duration", episode_duration, self.current_episode)
-
 
     def validate(self):
         pass

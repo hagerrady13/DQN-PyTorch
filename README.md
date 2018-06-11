@@ -8,12 +8,13 @@ A Pytorch implementation of [Human-level control through deep reinforcement lear
 ├── graphs
 |  └── models
 |  |  └── dqn.py
-|  |  └── replay_memory.py
 |  └── losses
 |  |  └── loss.py # contains the binary cross entropy
 ├── datasets  # contains all dataloaders for the project
-├── utils # utilities folder containing input extraction, config parsing, etc
+├── utils # utilities folder containing input extraction, replay memory, config parsing, etc
 |  └── assets
+|  └── replay_memory.py
+|  └── env_utils.py
 ├── main.py
 ├── run.sh
 ```
