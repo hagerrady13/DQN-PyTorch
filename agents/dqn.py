@@ -1,25 +1,18 @@
-import numpy as np
-
-from tqdm import tqdm
-import shutil
-import random
 import math
+import random
+import shutil
+
 import gym
-
 import torch
-from torch import nn
-from torch.backends import cudnn
-from torch.autograd import Variable
-import torchvision.utils as vutils
-
-from graphs.models.dqn import DQN
-from graphs.models.replay_memory import ReplayMemory, Transition
-from graphs.losses.loss import HuberLoss
-
 from tensorboardX import SummaryWriter
-from utils.metrics import AverageMeter, AverageMeterList, evaluate
-from utils.misc import print_cuda_statistics
+from torch.backends import cudnn
+from tqdm import tqdm
+
+from graphs.losses.loss import HuberLoss
+from graphs.models.dqn import DQN
 from utils.extract_env_input import CartPoleEnv
+from utils.misc import print_cuda_statistics
+from utils.replay_memory import ReplayMemory, Transition
 
 cudnn.benchmark = True
 
@@ -70,8 +63,7 @@ class DQNAgent:
             print("Program will run on *****CPU***** ")
             self.device = "cpu"
 
-        # Model Loading from the latest checkpoint if not found start from scratch.
-        # self.load_checkpoint(self.config.checkpoint_file)
+        # Initialize Target model with policy model state dict
         self.target_model.load_state_dict(self.policy_model.state_dict())
         self.target_model.eval()
 
@@ -126,7 +118,7 @@ class DQNAgent:
         self.current_iteration += 1
         if sample > eps_threshold:
             with torch.no_grad():
-                return self.policy_model(state).max(1)[1].view(1, 1)
+                return self.policy_model(state).max(1)[1].view(1, 1)        # size (1,1)
         else:
             return torch.tensor([[random.randrange(2)]], device=self.device, dtype=torch.long)
 
@@ -136,32 +128,30 @@ class DQNAgent:
         # sample a batch
         transitions = self.memory.sample_batch(self.batch_size)
 
-        # print("Transitions", transitions)
         one_batch = Transition(*zip(*transitions))
-        # print("One batch", one_batch)
 
-        # concatenate all tensors into one
-        state_batch = torch.cat(one_batch.state)
-        action_batch = torch.cat(one_batch.action)
-        reward_batch = torch.cat(one_batch.reward)
+        # concatenate all batch elements into one
+        state_batch = torch.cat(one_batch.state)            # [128, 3, 40, 80]
+        action_batch = torch.cat(one_batch.action)          # [128, 1]
+        reward_batch = torch.cat(one_batch.reward)          # [128]
 
         # debug here
-        curr_state_values = self.policy_model(state_batch)
-        curr_state_action_values = curr_state_values.gather(1, action_batch)
+        curr_state_values = self.policy_model(state_batch)          # [128, 2]
+        curr_state_action_values = curr_state_values.gather(1, action_batch)        # [128, 1]
 
         # create a mask of non-final states
-        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,one_batch.next_state)), device=self.device, dtype=torch.uint8)
-        non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,one_batch.next_state)), device=self.device, dtype=torch.uint8)      # [128]
+        non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])       # [< 128, 3, 40, 80]
 
         # Get V(s_{t+1}) for all next states. By definition we set V(s)=0 if s is a terminal state.
-        next_state_values = torch.zeros(self.batch_size, device=self.device)
-        next_state_values[non_final_mask] = self.target_model(non_final_next_states).max(1)[0].detach()
+        next_state_values = torch.zeros(self.batch_size, device=self.device)        # [128]
+        next_state_values[non_final_mask] = self.target_model(non_final_next_states).max(1)[0].detach()     # [< 128]
 
         # Get the expected Q values
-        expected_state_action_values = (next_state_values * self.config.gamma) + reward_batch
-
+        expected_state_action_values = (next_state_values * self.config.gamma) + reward_batch       # [128]
         # compute loss: temporal difference error
         loss = self.loss(curr_state_action_values, expected_state_action_values.unsqueeze(1))
+
         # optimizer step
         self.optim.zero_grad()
         loss.backward()
@@ -174,6 +164,8 @@ class DQNAgent:
     def train(self):
         for episode in tqdm(range(self.current_episode, self.config.num_episodes)):
             self.current_episode = episode
+            # reset environment
+            self.env.reset()
             self.train_one_epoch()
             # update the target model???
             # The target network has its weights kept frozen most of the time
@@ -186,8 +178,6 @@ class DQNAgent:
 
     def train_one_epoch(self):
         episode_duration = 0
-        # reset environment
-        self.env.reset()
         prev_frame = self.cartpole.get_screen(self.env)
         curr_frame = self.cartpole.get_screen(self.env)
         # get state

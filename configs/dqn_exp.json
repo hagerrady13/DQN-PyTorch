@@ -1,5 +1,5 @@
 {
-  "exp_name": "exp_0",
+  "exp_name": "exp_3",
   "agent": "DQNAgent",
 
   "cuda": true,

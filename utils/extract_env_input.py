@@ -21,7 +21,6 @@ class CartPoleEnv:
         scale = self.screen_width / world_width
         return int(env.state[0] * scale + self.screen_width / 2.0)  # MIDDLE OF CART
 
-
     def get_screen(self, env):
         screen = env.render(mode='rgb_array').transpose((2, 0, 1))  # transpose into torch order (CHW)
         # Strip off the top and bottom of the screen
