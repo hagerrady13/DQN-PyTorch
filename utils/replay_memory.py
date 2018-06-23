@@ -5,7 +5,7 @@ date: 1st of June 2018
 import random
 from collections import namedtuple
 
-Transition = namedtuple('Transition',('state', 'action', 'next_state', 'reward'))
+Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
 
 class ReplayMemory(object):
@@ -23,11 +23,8 @@ class ReplayMemory(object):
         if self.length() < self.capacity:
             self.memory.append(None)
         self.memory[self.position] = Transition(*args)
-        self.position = (self.position + 1) % self.capacity     # for the cyclic buffer
+        self.position = (self.position + 1) % self.capacity  # for the cyclic buffer
 
     def sample_batch(self, batch_size):
         batch = random.sample(self.memory, batch_size)
         return batch
-
-
-

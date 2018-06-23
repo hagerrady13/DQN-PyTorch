@@ -11,6 +11,7 @@ class BinaryCrossEntropy(nn.Module):
         loss = self.loss(logits, labels)
         return loss
 
+
 class HuberLoss(nn.Module):
     def __init__(self):
         super().__init__()
@@ -19,4 +20,3 @@ class HuberLoss(nn.Module):
     def forward(self, logits, labels):
         loss = self.loss(logits, labels)
         return loss
-
