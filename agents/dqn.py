@@ -36,7 +36,6 @@ class DQNAgent:
         self.optim = torch.optim.RMSprop(self.policy_model.parameters())
 
         # define environment
-        # self.env = gym.make('MsPacman-v0').unwrapped
         self.env = gym.make('CartPole-v0').unwrapped
         self.cartpole = CartPoleEnv(self.config.screen_width)
 
@@ -136,8 +135,7 @@ class DQNAgent:
         one_batch = Transition(*zip(*transitions))
 
         # create a mask of non-final states
-        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, one_batch.next_state)), device=self.device,
-                                      dtype=torch.uint8)  # [128]
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, one_batch.next_state)), device=self.device,dtype=torch.uint8)  # [128]
         non_final_next_states = torch.cat([s for s in one_batch.next_state if s is not None])  # [< 128, 3, 40, 80]
 
         # concatenate all batch elements into one
@@ -149,7 +147,6 @@ class DQNAgent:
             state_batch = state_batch.cuda()
             non_final_next_states = non_final_next_states.cuda()
 
-        # debug here
         curr_state_values = self.policy_model(state_batch)  # [128, 2]
         curr_state_action_values = curr_state_values.gather(1, action_batch)  # [128, 1]
 
@@ -177,12 +174,10 @@ class DQNAgent:
             # reset environment
             self.env.reset()
             self.train_one_epoch()
-            # update the target model???
             # The target network has its weights kept frozen most of the time
             if self.current_episode % self.config.target_update == 0:
                 self.target_model.load_state_dict(self.policy_model.state_dict())
 
-        print('Complete')
         self.env.render()
         self.env.close()
 
@@ -193,7 +188,7 @@ class DQNAgent:
         # get state
         curr_state = curr_frame - prev_frame
 
-        while (1):
+        while(1):
             episode_duration += 1
             # select action
             action = self.select_action(curr_state)
@@ -218,7 +213,7 @@ class DQNAgent:
 
             curr_state = next_state
 
-            # Policy model optimization step #
+            # Policy model optimization step
             curr_loss = self.optimize_policy_model()
             if curr_loss is not None:
                 if self.cuda:

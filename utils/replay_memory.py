@@ -1,5 +1,6 @@
 """
 Replay Memory class
+Adapted from: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
 date: 1st of June 2018
 """
 import random

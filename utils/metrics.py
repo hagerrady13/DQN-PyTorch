@@ -3,7 +3,6 @@ This file will contain the metrics of the framework
 """
 import numpy as np
 
-# TODO Add metrics for segmentation
 
 def _fast_hist(label_pred, label_true, num_classes):
     mask = (label_true >= 0) & (label_true < num_classes)

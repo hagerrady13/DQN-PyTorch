@@ -23,10 +23,15 @@ A Pytorch implementation of [Human-level control through deep reinforcement lear
 #### 1. CartPole V0:
 Loss during training:
 
+![alt text](./utils/assets/CartPole_exp0_loss.png "Loss during training")
+
 Number of durations per Episode:
-#### 2.
+
+![alt text](./utils/assets/CartPole_exp0_episodes.png "Loss during training")
+
+
 ### Usage:
-- To run the project, you need to add your configurations into the folder configs/ as fround here [here](https://github.com/hagerrady13/DCGAN-Pytorch/blob/master/configs/dqn_exp.json)
+- To run the project, you need to add your configurations into the folder configs/ as fround here [here](https://github.com/hagerrady13/DQN-Pytorch/blob/master/configs/dqn_exp_0.json)
 - ``` sh run.sh ```
 - To run on a GPU, you need to enable cuda in the config file.
 
@@ -36,6 +41,9 @@ Number of durations per Episode:
 - torchvision: 0.2.1
 - tensorboardX: 0.8
 
+### To-Do:
+
+- Test DQN on a more complex environment such as MS-Pacman
 
 ### References:
 - Pytorch official example: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html

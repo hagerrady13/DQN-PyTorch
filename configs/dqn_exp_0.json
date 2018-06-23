@@ -1,5 +1,5 @@
 {
-  "exp_name": "exp_9",
+  "exp_name": "exp_000",
   "agent": "DQNAgent",
 
   "cuda": true,
@@ -21,7 +21,7 @@
 
   "memory_capacity":10000,
 
-  "num_episodes":100,
+  "num_episodes":50,
 
   "screen_width": 600,
 
