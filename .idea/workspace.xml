@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="302207f6-2317-4008-a218-34b1befc467d" name="Default" comment="fixes">
+    <list default="true" id="302207f6-2317-4008-a218-34b1befc467d" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agents/dqn.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/dqn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configs/dqn_exp.json" beforeDir="false" afterPath="$PROJECT_DIR$/configs/dqn_exp_0.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphs/losses/loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphs/losses/loss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/replay_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/replay_memory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/training_utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphs/losses/loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphs/losses/huber_loss.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -27,23 +22,11 @@
       <file leaf-file-name="dqn.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/agents/dqn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
-              <caret line="189" lean-forward="true" selection-start-line="189" selection-end-line="189" />
+            <state relative-caret-position="225">
+              <caret line="198" column="102" selection-start-line="198" selection-start-column="102" selection-end-line="198" selection-end-column="102" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="495">
-                <caret line="33" column="158" selection-start-line="33" selection-start-column="158" selection-end-line="33" selection-end-column="158" />
-              </first_editor>
-              <second_editor />
             </state>
           </provider>
         </entry>
@@ -63,8 +46,8 @@
       <file leaf-file-name="dqn_exp_0.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/configs/dqn_exp_0.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="19" lean-forward="true" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+            <state relative-caret-position="45">
+              <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
             </state>
           </provider>
         </entry>
@@ -78,9 +61,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="misc.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/utils/misc.py">
-          <provider selected="true" editor-type-id="text-editor" />
+      <file leaf-file-name="huber_loss.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/graphs/losses/huber_loss.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" selection-start-line="3" selection-end-line="3" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
@@ -147,6 +137,17 @@
               <item name="DQN-Pytorch" type="b2602c69:ProjectViewProjectNode" />
               <item name="DQN-Pytorch" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="DQN-Pytorch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DQN-Pytorch" type="462c0819:PsiDirectoryNode" />
+              <item name="graphs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DQN-Pytorch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DQN-Pytorch" type="462c0819:PsiDirectoryNode" />
+              <item name="graphs" type="462c0819:PsiDirectoryNode" />
+              <item name="losses" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -202,6 +203,14 @@
       <option name="presentableId" value="Default" />
       <updated>1527876988412</updated>
     </task>
+    <task id="LOCAL-00001" summary="Updated README and repo cleaning">
+      <created>1529767886366</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1529767886366</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -260,6 +269,10 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Updated README and repo cleaning" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated README and repo cleaning" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <option name="time" value="2" />
@@ -296,7 +309,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/graphs/losses/loss.py">
+    <entry file="file://$PROJECT_DIR$/graphs/losses/huber_loss.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="8" selection-start-line="8" selection-end-line="8" />
@@ -347,7 +360,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/graphs/losses/loss.py">
+    <entry file="file://$PROJECT_DIR$/graphs/losses/huber_loss.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="95">
           <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
@@ -378,7 +391,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/training_utils.py" />
-    <entry file="file://$PROJECT_DIR$/graphs/losses/loss.py">
+    <entry file="file://$PROJECT_DIR$/graphs/losses/huber_loss.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
           <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
@@ -414,25 +427,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/graphs/losses/loss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/graphs/weights_initializer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="5" column="4" selection-start-line="5" selection-start-column="4" selection-end-line="5" selection-end-column="4" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/misc.py">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/metrics.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -451,19 +451,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/run.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="33" selection-start-line="2" selection-start-column="33" selection-end-line="2" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/configs/dqn_exp_0.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="19" lean-forward="true" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/replay_memory.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -475,14 +464,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://$PROJECT_DIR$/configs/dqn_exp_0.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/misc.py">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="33" selection-start-line="2" selection-start-column="33" selection-end-line="2" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graphs/losses/huber_loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="495">
-            <caret line="33" column="158" selection-start-line="33" selection-start-column="158" selection-end-line="33" selection-end-column="158" />
+          <first_editor relative-caret-position="165">
+            <caret line="11" column="56" selection-start-line="11" selection-start-column="56" selection-end-line="11" selection-end-column="56" />
           </first_editor>
           <second_editor />
         </state>
@@ -490,8 +503,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/agents/dqn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="189" lean-forward="true" selection-start-line="189" selection-end-line="189" />
+        <state relative-caret-position="225">
+          <caret line="198" column="102" selection-start-line="198" selection-start-column="102" selection-end-line="198" selection-end-column="102" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

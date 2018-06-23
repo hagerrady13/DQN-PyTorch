@@ -8,7 +8,7 @@ from tensorboardX import SummaryWriter
 from torch.backends import cudnn
 from tqdm import tqdm
 
-from graphs.losses.loss import HuberLoss
+from graphs.losses.huber_loss import HuberLoss
 from graphs.models.dqn import DQN
 from utils.env_utils import CartPoleEnv
 from utils.misc import print_cuda_statistics
@@ -43,6 +43,7 @@ class DQNAgent:
         self.current_episode = 0
         self.current_iteration = 0
         self.episode_durations = []
+
         self.batch_size = self.config.batch_size
 
         # set cuda flag
@@ -55,14 +56,14 @@ class DQNAgent:
         if self.cuda:
             print("Program will run on *****GPU-CUDA***** ")
             print_cuda_statistics()
-
-            self.policy_model = self.policy_model.cuda()
-            self.target_model = self.target_model.cuda()
-            self.loss = self.loss.cuda()
             self.device = "cuda"
         else:
             print("Program will run on *****CPU***** ")
             self.device = "cpu"
+
+        self.policy_model = self.policy_model.to(self.device)
+        self.target_model = self.target_model.to(self.device)
+        self.loss = self.loss.to(self.device)
 
         # Initialize Target model with policy model state dict
         self.target_model.load_state_dict(self.policy_model.state_dict())
@@ -114,6 +115,11 @@ class DQNAgent:
             print("You have entered CTRL+C.. Wait to finalize")
 
     def select_action(self, state):
+        """
+        The action selection function, it either uses the model to choose an action or samples one uniformly.
+        :param state: current state of the model
+        :return:
+        """
         if self.cuda:
             state = state.cuda()
         sample = random.random()
@@ -127,6 +133,10 @@ class DQNAgent:
             return torch.tensor([[random.randrange(2)]], device=self.device, dtype=torch.long)
 
     def optimize_policy_model(self):
+        """
+        performs a single step of optimization for the policy model
+        :return:
+        """
         if self.memory.length() < self.batch_size:
             return
         # sample a batch
@@ -143,9 +153,8 @@ class DQNAgent:
         action_batch = torch.cat(one_batch.action)  # [128, 1]
         reward_batch = torch.cat(one_batch.reward)  # [128]
 
-        if self.cuda:
-            state_batch = state_batch.cuda()
-            non_final_next_states = non_final_next_states.cuda()
+        state_batch = state_batch.to(self.device)
+        non_final_next_states = non_final_next_states.to(self.device)
 
         curr_state_values = self.policy_model(state_batch)  # [128, 2]
         curr_state_action_values = curr_state_values.gather(1, action_batch)  # [128, 1]
@@ -169,6 +178,10 @@ class DQNAgent:
         return loss
 
     def train(self):
+        """
+        Training loop based on the number of episodes
+        :return:
+        """
         for episode in tqdm(range(self.current_episode, self.config.num_episodes)):
             self.current_episode = episode
             # reset environment
@@ -182,6 +195,10 @@ class DQNAgent:
         self.env.close()
 
     def train_one_epoch(self):
+        """
+        One episode of training; it samples an action, observe next screen and optimize the model once
+        :return:
+        """
         episode_duration = 0
         prev_frame = self.cartpole.get_screen(self.env)
         curr_frame = self.cartpole.get_screen(self.env)
@@ -196,9 +213,9 @@ class DQNAgent:
             _, reward, done, _ = self.env.step(action.item())
 
             if self.cuda:
-                reward = torch.Tensor([reward]).cuda()
+                reward = torch.Tensor([reward]).to(self.device)
             else:
-                reward = torch.Tensor([reward])
+                reward = torch.Tensor([reward]).to(self.device)
 
             prev_frame = curr_frame
             curr_frame = self.cartpole.get_screen(self.env)
@@ -218,8 +235,7 @@ class DQNAgent:
             if curr_loss is not None:
                 if self.cuda:
                     curr_loss = curr_loss.cpu()
-                self.summary_writer.add_scalar("Temporal Difference Loss", curr_loss.detach().numpy(),
-                                               self.current_iteration)
+                self.summary_writer.add_scalar("Temporal Difference Loss", curr_loss.detach().numpy(), self.current_iteration)
             # check if done
             if done:
                 break

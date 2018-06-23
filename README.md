@@ -9,7 +9,7 @@ A Pytorch implementation of [Human-level control through deep reinforcement lear
 |  └── models
 |  |  └── dqn.py
 |  └── losses
-|  |  └── loss.py # contains the binary cross entropy
+|  |  └── huber_loss.py # contains huber loss definition
 ├── datasets  # contains all dataloaders for the project
 ├── utils # utilities folder containing input extraction, replay memory, config parsing, etc
 |  └── assets
@@ -31,7 +31,7 @@ Number of durations per Episode:
 
 
 ### Usage:
-- To run the project, you need to add your configurations into the folder configs/ as fround here [here](https://github.com/hagerrady13/DQN-Pytorch/blob/master/configs/dqn_exp_0.json)
+- To run the project, you need to add your configurations into the folder configs/ as fround [here](https://github.com/hagerrady13/DQN-Pytorch/blob/master/configs/dqn_exp_0.json)
 - ``` sh run.sh ```
 - To run on a GPU, you need to enable cuda in the config file.
 
