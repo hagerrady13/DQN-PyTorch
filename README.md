@@ -1,7 +1,7 @@
-# DQN-Pytorch
-A Pytorch implementation of [Human-level control through deep reinforcement learning](https://www.nature.com/articles/nature14236)
+# DQN-PyTorch
+A PyTorch implementation of [Human-level control through deep reinforcement learning](https://www.nature.com/articles/nature14236)
 
-### Project structure:
+### Project Structure:
 ```
 ├── agents
 |  └── dqn.py # the main training agent for the dqn
@@ -16,11 +16,11 @@ A Pytorch implementation of [Human-level control through deep reinforcement lear
 |  └── replay_memory.py
 |  └── env_utils.py
 ├── main.py
-├── run.sh
+└── run.sh
 ```
 
 ### Environments:
-#### 1. CartPole V0:
+#### CartPole V0:
 Loss during training:
 
 ![alt text](./utils/assets/CartPole_exp0_loss.png "Loss during training")
@@ -31,7 +31,7 @@ Number of durations per Episode:
 
 
 ### Usage:
-- To run the project, you need to add your configurations into the folder configs/ as fround [here](https://github.com/hagerrady13/DQN-Pytorch/blob/master/configs/dqn_exp_0.json)
+- To run the project, you need to add your configurations into the folder ```configs/``` as fround [here](https://github.com/hagerrady13/DQN-Pytorch/blob/master/configs/dqn_exp_0.json)
 - ``` sh run.sh ```
 - To run on a GPU, you need to enable cuda in the config file.
 
@@ -47,7 +47,7 @@ Number of durations per Episode:
 
 ### References:
 - Pytorch official example: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
-- pytorch-dqn: https://github.com/transedward/pytorch-dqn/blob/master/dqn_learn.py
+- Pytorch-dqn: https://github.com/transedward/pytorch-dqn/blob/master/dqn_learn.py
 
 ### License:
 This project is licensed under MIT License - see the LICENSE file for details.
